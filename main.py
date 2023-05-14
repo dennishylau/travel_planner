@@ -17,9 +17,6 @@ ox.settings.log_console = True
 ox.settings.use_cache = True
 st.set_page_config(page_title='Travel Planner POC', layout="wide")
 st.title('2023-09 Japan')
-# UI element calculation
-screen_width = st_js("window.innerWidth")
-map_height = 400 if screen_width < 768 else 500
 # get gsheet as datasource
 gc = gspread.service_account_from_dict(st.secrets.google_secrets)
 sh = gc.open_by_key(st.secrets["gsheet_key"])
@@ -34,7 +31,10 @@ fetch_gmaps_data(gs_df, gmaps, ws)
 travel_dates = sorted(gs_df['date'].unique())
 with st.sidebar:
     input_date = st.selectbox('Select Travel Date', ['All'] + travel_dates)
-# %%
+# UI element calculation
+screen_width = st_js("window.innerWidth")
+map_width = screen_width - 50
+map_height = 400 if screen_width < 768 else 650
 
 
 def plot_date(gs_df: pd.DataFrame, date_str: str):
@@ -43,6 +43,7 @@ def plot_date(gs_df: pd.DataFrame, date_str: str):
     date_df = gs_df.query(f"date == '{date_str}'")
     places = [Place(*date_df.loc[idx, :]) for idx, row in date_df.iterrows()]
 
+    # TODO: update the hardcoded country
     country = 'Japan'
 
     for city in date_df['city'].unique():
@@ -57,7 +58,7 @@ def plot_date(gs_df: pd.DataFrame, date_str: str):
         else:
             interactive_map = plot_intra_city(country, pois)
         st_folium(interactive_map,
-                  width=screen_width - 40,
+                  width=map_width,
                   height=map_height,
                   returned_objects=[])
 
