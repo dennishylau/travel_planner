@@ -45,14 +45,13 @@ with col1:
         plot_date(gs_df, date, map_width, map_height)
 
 
-if not is_mobile:
-    with col2:
-        # reload_data = False
-        grid = build_aggrid(gs_df)
-        gs_df = grid['data']
-        updated = update_date_order(gs_df, travel_dates)
-        if updated:
-            update_ws(ws, gs_df)
+with col2:
+    # reload_data = False
+    grid = build_aggrid(gs_df)
+    gs_df = grid['data']
+    updated = update_date_order(gs_df, travel_dates)
+    if updated:
+        update_ws(ws, gs_df)
 
 
 st.write('''
