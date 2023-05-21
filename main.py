@@ -46,7 +46,6 @@ with col1:
 
 
 with col2:
-    # reload_data = False
     grid = build_aggrid(gs_df)
     gs_df = grid['data']
     updated = update_date_order(gs_df, travel_dates)
