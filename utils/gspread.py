@@ -3,10 +3,17 @@ import pandas as pd
 import gspread
 import googlemaps
 
+GMAPS_CLIENT = googlemaps.Client(key=st.secrets["gmaps_api_key"])
+
+
+def update_ws(ws: gspread.Worksheet, df: pd.DataFrame):
+    with st.spinner('Updating Google Sheet'):
+        ws.update([df.columns.values.tolist()] + df.values.tolist())
+
 
 def fetch_gmaps_data(gs_df: pd.DataFrame,
-                     gmaps: googlemaps.Client,
-                     ws: gspread.Worksheet) -> pd.DataFrame:
+                     ws: gspread.Worksheet,
+                     gmaps: googlemaps.Client = GMAPS_CLIENT) -> pd.DataFrame:
     '''
     Fetch missing gmaps data for google sheet records
     gs_df: the travel planner dataframe
@@ -18,7 +25,7 @@ def fetch_gmaps_data(gs_df: pd.DataFrame,
     for idx, row in gs_df.iterrows():
         if row['place_id'].strip() == "" and row['name'].strip() != "" and row['city'].strip() != "":
             updated = True
-            st.write(f"Updating row: {row['name']}")
+            print(f"Updating row: {row['name']}")
             geocode_results = gmaps.geocode(f"{row['name']}, {row['city']}")
             if len(geocode_results) == 0:
                 break
@@ -30,5 +37,4 @@ def fetch_gmaps_data(gs_df: pd.DataFrame,
 
     # %%
     if updated:
-        st.write(f'Updated: {updated}')
-        ws.update([gs_df.columns.values.tolist()] + gs_df.values.tolist())
+        update_ws(ws, gs_df)
